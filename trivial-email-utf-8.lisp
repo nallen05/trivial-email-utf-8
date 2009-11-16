@@ -39,7 +39,8 @@
 and sends headers appropriately when it encounters unicode"
   (declare (ignore port cc bcc reply-to display-name
 		   authentication attachments buffer-size))
-  (let ((unicodep (.unicode-p message)))
+  (let ((unicodep (.unicode-p message))
+        (cl-smtp::*content-type* "text/plain; charset=utf-8"))
     (apply 'cl-smtp:send-email
 	   host
 	   from
@@ -49,11 +50,9 @@ and sends headers appropriately when it encounters unicode"
 	       (.qprint-encode/utf-8 message)
 	       message)
 	   (if unicodep
-	       (list* :extra-headers `((:content-transfer-encoding "quoted-printable")
-				       (:mime-version "1.0")
-				       (:content-type "text/plain; charset=utf-8")
-				       ,@extra-headers)
-		      kwd-args)
+               (list* :extra-headers `((:content-transfer-encoding "quoted-printable")
+                                       ,@extra-headers)
+                      kwd-args)
 	       kwd-args))))
 
 (defun invite-user (host server-email-address invited-by invited subject message 
